@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta property="og:image" content="https://i.imgur.com/psg4kvm.jpeg"/>
+  <title>Web Nghe Nhạc Tổng Hợp By Ng Quang Huy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('https://i.imgur.com/ODrhMjH.jpeg');
+      background-size: cover;
+      background-position: center;
+      font-family: 'Arial', sans-serif;
+      color: white;
+      text-shadow: 1px 1px 2px black;
+    }
+
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 24px;
+      user-select: none;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% {transform: translateY(0);}
+      100% {transform: translateY(100vh);}
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      margin: 40px auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 800px;
+      border-radius: 20px;
+      text-align: center;
+    }
+
+    img.avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid white;
+      margin-bottom: 10px;
+    }
+
+    .blink {
+      animation: blink 1s infinite alternate;
+    }
+
+    @keyframes blink {
+      from { opacity: 1; }
+      to { opacity: 0.3; }
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .music-list {
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .music-list p {
+      margin: 5px 0;
+    }
+
+    .info {
+      margin: 10px 0;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <img class="avatar" src="https://i.imgur.com/SlMlm1I.jpeg" alt="Avatar admin">
+  <h2 class="blink">Chào mừng đến với web phát nhạc của Ng Quang Huy!</h2>
+  <div class="info blink">
+    <p>Admin: Ng Quang Huy</p>
+    <p>Zalo: 0904562214</p>
+    <p>Ngày cập nhật: 11/04/2025</p>
+    <p id="clock"></p>
+  </div>
+
+  <button onclick="showMusic()">Nghe nhạc</button>
+  <div id="musicBox" style="display:none;">
+    <div class="music-list blink" id="musicList"></div>
+
+    <input type="text" id="trackInput" placeholder="Nhập số bài hát (vd: 1,2,3)">
+    <button onclick="playSelected()">OK</button>
+    <p class="blink">Chúc ae nghe nhạc vui vẻ!</p>
+    <button onclick="stopMusic()">STOP</button>
+    <button onclick="resumeMusic()">TIẾP TỤC</button>
+    <audio id="audioPlayer" controls></audio>
+  </div>
+</div>
+
+<script>
+  const musicFiles = [
+    "Nỗi Đau Mình Anh Remix.mp3",
+    "Chuỗi Ngày Vắng Em Remix.mp3",
+    "Người Ta Không Yêu Em Đâu Remix.mp3",
+    "Em Cũng Vô Tình Remix.mp3",
+    "Quên Anh Trong Từng Cơn Đau Remix.mp3",
+    "Kẹo Bông Gòn Remix.mp3",
+    "Ghét Chính Anh Remix.mp3",
+    "Bạn Thân Ơi Remix.mp3",
+    "Nhiều Chông Gai Remix.mp3",
+    "Anh Em Khu 2 Remix.mp3"
+  ];
+
+  function showMusic() {
+    document.getElementById('musicBox').style.display = 'block';
+    const list = document.getElementById('musicList');
+    list.innerHTML = '';
+    musicFiles.forEach((file, i) => {
+      const name = file.replace('.mp3', '');
+      list.innerHTML += `<p>${i + 1} - ${name}</p>`;
+    });
+  }
+
+  let currentTracks = [];
+  let currentIndex = 0;
+  const player = document.getElementById('audioPlayer');
+
+  function playSelected() {
+    const input = document.getElementById('trackInput').value;
+    const numbers = input.split(',').map(n => parseInt(n.trim()) - 1);
+    currentTracks = numbers.filter(i => i >= 0 && i < musicFiles.length);
+    currentIndex = 0;
+    if (currentTracks.length > 0) {
+      playTrack(currentIndex);
+    }
+  }
+
+  function playTrack(index) {
+    player.src = 'mp3/' + musicFiles[currentTracks[index]];
+    player.play();
+    player.onended = () => {
+      currentIndex++;
+      if (currentIndex < currentTracks.length) {
+        playTrack(currentIndex);
+      }
+    };
+  }
+
+  function stopMusic() {
+    player.pause();
+  }
+
+  function resumeMusic() {
+    player.play();
+  }
+
+  function createSnowflake() {
+    const snowflake = document.createElement('div');
+    snowflake.className = 'snowflake';
+    snowflake.innerText = '❄';
+    snowflake.style.left = Math.random() * 100 + 'vw';
+    snowflake.style.animationDuration = (3 + Math.random() * 5) + 's';
+    document.body.appendChild(snowflake);
+    setTimeout(() => snowflake.remove(), 8000);
+  }
+  setInterval(createSnowflake, 200);
+
+  function updateClock() {
+    const now = new Date();
+    const timeStr = now.toLocaleString('vi-VN');
+    document.getElementById('clock').innerText = 'Thời gian: ' + timeStr;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+</script>
+
+</body>
+</html>
