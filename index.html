@@ -1,113 +1,318 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta property="og:image" content="https://i.imgur.com/psg4kvm.jpeg"/>
   <meta property="og:description" content="Nghe Nhạc Remix-Chill Hay Tại Web Của Ng Quang Huy Nhé 🎧 🎶" />
   <title>Web Nghe Nhạc Tổng Hợp By Ng Quang Huy</title>
+  <!-- Favicon using Imgur image -->
+  <link rel="icon" type="image/jpeg" href="https://i.imgur.com/SlMlm1I.jpeg">
+  <!-- Apple Touch Icon for iOS devices -->
+  <link rel="apple-touch-icon" href="https://i.imgur.com/SlMlm1I.jpeg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
       background-image: url('https://i.imgur.com/ODrhMjH.jpeg');
       background-size: cover;
       background-position: center;
-      font-family: 'Arial', sans-serif;
-      color: white;
-      text-shadow: 1px 1px 2px black;
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
     }
 
     .snowflake {
       position: fixed;
       top: -10px;
-      color: white;
-      font-size: 24px;
-      user-select: none;
+      color: #fff;
+      font-size: 18px;
+      opacity: 0.8;
+      pointer-events: none;
       animation: fall linear infinite;
     }
 
     @keyframes fall {
-      0% {transform: translateY(0);}
-      100% {transform: translateY(100vh);}
+      0% { transform: translateY(-10vh) rotate(0deg); }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
 
     .container {
-      background: rgba(0, 0, 0, 0.6);
-      margin: 40px auto;
-      padding: 20px;
-      width: 90%;
-      max-width: 800px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
       border-radius: 20px;
+      margin: 40px auto;
+      padding: 30px;
+      width: 90%;
+      max-width: 900px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeIn 1s ease-in;
     }
 
-    img.avatar {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .avatar {
       width: 120px;
       height: 120px;
       border-radius: 50%;
-      border: 3px solid white;
-      margin-bottom: 10px;
+      border: 4px solid #fff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      margin-bottom: 15px;
+      transition: transform 0.3s ease;
     }
 
-    .blink {
-      animation: blink 1s infinite alternate;
+    .avatar:hover {
+      transform: scale(1.1);
     }
 
-    @keyframes blink {
-      from { opacity: 1; }
-      to { opacity: 0.3; }
+    h2 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
     }
 
-    input, button {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .info {
+      font-size: 1rem;
+      margin: 15px 0;
+      color: #e0e0e0;
+      line-height: 1.6;
+    }
+
+    .info p {
+      margin: 5px 0;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    button {
+      background: linear-gradient(135deg, #ff6b6b, #ff8e53);
       border: none;
-      font-size: 16px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #ff8e53, #ff6b6b);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    input {
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 300px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #ffd700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
     }
 
     audio {
       width: 100%;
       margin-top: 20px;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
     }
 
     .music-list {
-      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
       text-align: left;
     }
 
     .music-list p {
-      margin: 5px 0;
+      margin: 8px 0;
+      font-size: 0.9rem;
+      color: #e0e0e0;
+      cursor: pointer;
+      transition: color 0.3s ease;
     }
 
-    .info {
+    .music-list p:hover {
+      color: #ffd700;
+    }
+
+    .music-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .music-list::-webkit-scrollbar-thumb {
+      background: #ffd700;
+      border-radius: 4px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .progress {
+      height: 100%;
+      background: #ffd700;
+      border-radius: 5px;
+      width: 0;
+      transition: width 0.1s linear;
+    }
+
+    .current-track {
+      font-size: 1rem;
+      color: #ffd700;
       margin: 10px 0;
     }
 
+    @media (max-width: 600px) {
+      .container {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+      }
+
+      .avatar {
+        width: 80px;
+        height: 80px;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+
+      input {
+        max-width: 250px;
+      }
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
   <img class="avatar" src="https://i.imgur.com/SlMlm1I.jpeg" alt="Avatar admin">
-  <h2 class="blink">Chào mừng đến với web phát nhạc của Ng Quang Huy!</h2>
-  <div class="info blink">
-    <p>Admin: Ng Quang Huy</p>
-    <p>Zalo: 0904562214</p>
-    <p>Ngày cập nhật: 11/04/2025</p>
-    <p id="clock"></p>
+  <h2>Web Nghe Nhạc Remix-Chill By Ng Quang Huy</h2>
+  <div class="info">
+    <p><i class="fas fa-user"></i> Admin: Ng Quang Huy</p>
+    <p><i class="fas fa-phone"></i> Zalo: 0904562214</p>
+    <p><i class="fas fa-calendar-alt"></i> Ngày cập nhật: 11/04/2025</p>
+    <p><i class="fas fa-clock"></i> <span id="clock"></span></p>
   </div>
 
-  <button onclick="showMusic()">Nghe nhạc</button>
-  <div id="musicBox" style="display:none;">
-    <div class="music-list blink" id="musicList"></div>
+  <div class="button-group">
+    <button onclick="showMusic()"><i class="fas fa-music"></i> Nghe Nhạc</button>
+    <button onclick="togglePlaylist()"><i class="fas fa-list"></i> Danh Sách Nhạc</button>
+  </div>
 
-    <input type="text" id="trackInput" placeholder="Nhập số bài hát (vd: 1,2,3)">
-    <button onclick="playSelected()">OK</button>
-    <p class="blink">Chúc ae nghe nhạc vui vẻ!</p>
-    <button onclick="stopMusic()">STOP</button>
-    <button onclick="resumeMusic()">TIẾP TỤC</button>
+  <div id="musicBox" style="display:none;">
+    <div class="music-list" id="musicList"></div>
+    <div class="current-track" id="currentTrack">Đang phát: Không có bài hát nào</div>
+    <input type="text" id="trackInput" placeholder="Nhập số bài hát (VD: 1, 2, 3)">
+    <div class="button-group">
+      <button onclick="playSelected()"><i class="fas fa-play"></i> OK</button>
+      <button onclick="stopMusic()"><i class="fas fa-stop"></i> STOP</button>
+      <button onclick="resumeMusic()"><i class="fas fa-play"></i> TIẾP TỤC</button>
+    </div>
     <audio id="audioPlayer" controls></audio>
+    <div class="progress-bar" id="progressBar">
+      <div class="progress" id="progress"></div>
+    </div>
+    <p>Chúc bạn nghe nhạc vui vẻ! 🎶</p>
   </div>
 </div>
 
@@ -165,19 +370,40 @@
     "Nonstop 4in1 Remix.mp3"
   ];
 
+  const player = document.getElementById('audioPlayer');
+  const progressBar = document.getElementById('progressBar');
+  const progress = document.getElementById('progress');
+  const currentTrackEl = document.getElementById('currentTrack');
+  let currentTracks = [];
+  let currentIndex = 0;
+  let isPlaylistVisible = false;
+
   function showMusic() {
     document.getElementById('musicBox').style.display = 'block';
+    updateMusicList();
+  }
+
+  function togglePlaylist() {
+    isPlaylistVisible = !isPlaylistVisible;
+    const musicList = document.getElementById('musicList');
+    musicList.style.display = isPlaylistVisible ? 'block' : 'none';
+  }
+
+  function updateMusicList() {
     const list = document.getElementById('musicList');
     list.innerHTML = '';
     musicFiles.forEach((file, i) => {
       const name = file.replace('.mp3', '');
-      list.innerHTML += `<p>${i + 1} - ${name}</p>`;
+      const p = document.createElement('p');
+      p.innerHTML = `<i class="fas fa-music"></i> ${i + 1} - ${name}`;
+      p.onclick = () => {
+        currentTracks = [i];
+        currentIndex = 0;
+        playTrack(currentIndex);
+      };
+      list.appendChild(p);
     });
   }
-
-  let currentTracks = [];
-  let currentIndex = 0;
-  const player = document.getElementById('audioPlayer');
 
   function playSelected() {
     const input = document.getElementById('trackInput').value;
@@ -190,39 +416,69 @@
   }
 
   function playTrack(index) {
-    player.src = 'mp3/' + musicFiles[currentTracks[index]];
-    player.play();
+    const trackIndex = currentTracks[index];
+    player.src = 'mp3/' + musicFiles[trackIndex];
+    player.play().catch(() => {
+      alert('Vui lòng tương tác với trang để phát nhạc!');
+    });
+    currentTrackEl.textContent = `Đang phát: ${musicFiles[trackIndex].replace('.mp3', '')}`;
     player.onended = () => {
       currentIndex++;
       if (currentIndex < currentTracks.length) {
         playTrack(currentIndex);
+      } else {
+        currentTrackEl.textContent = 'Đang phát: Không có bài hát nào';
       }
     };
   }
 
   function stopMusic() {
     player.pause();
+    player.currentTime = 0;
   }
 
   function resumeMusic() {
-    player.play();
+    player.play().catch(() => {
+      alert('Vui lòng tương tác với trang để phát nhạc!');
+    });
   }
+
+  player.ontimeupdate = () => {
+    const progressPercent = (player.currentTime / player.duration) * 100;
+    progress.style.width = progressPercent + '%';
+  };
+
+  progressBar.onclick = (e) => {
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const percent = clickX / width;
+    player.currentTime = percent * player.duration;
+  };
 
   function createSnowflake() {
     const snowflake = document.createElement('div');
     snowflake.className = 'snowflake';
     snowflake.innerText = '❄';
     snowflake.style.left = Math.random() * 100 + 'vw';
-    snowflake.style.animationDuration = (3 + Math.random() * 5) + 's';
+    snowflake.style.animationDuration = (3 + Math.random() * 3) + 's';
+    snowflake.style.opacity = Math.random() * 0.5 + 0.5;
     document.body.appendChild(snowflake);
-    setTimeout(() => snowflake.remove(), 8000);
+    setTimeout(() => snowflake.remove(), 6000);
   }
-  setInterval(createSnowflake, 200);
+  setInterval(createSnowflake, 300);
 
   function updateClock() {
     const now = new Date();
-    const timeStr = now.toLocaleString('vi-VN');
-    document.getElementById('clock').innerText = 'Thời gian: ' + timeStr;
+    const timeStr = now.toLocaleString('vi-VN', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit', 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
+    document.getElementById('clock').innerText = timeStr;
   }
   setInterval(updateClock, 1000);
   updateClock();
