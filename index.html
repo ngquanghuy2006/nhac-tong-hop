@@ -45,9 +45,7 @@
   <meta property="og:image" content="https://i.imgur.com/psg4kvm.jpeg"/>
   <meta property="og:description" content="Nghe Nhạc Remix-Chill Hay Tại Web Của Ng Quang Huy Nhé 🎧 🎶" />
   <title>Web Nghe Nhạc Tổng Hợp By Ng Quang Huy</title>
-  <!-- Favicon using Imgur image -->
   <link rel="icon" type="image/jpeg" href="https://i.imgur.com/SlMlm1I.jpeg">
-  <!-- Apple Touch Icon for iOS devices -->
   <link rel="apple-touch-icon" href="https://i.imgur.com/SlMlm1I.jpeg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -297,6 +295,7 @@
   <div class="button-group">
     <button onclick="showMusic()"><i class="fas fa-music"></i> Nghe Nhạc</button>
     <button onclick="togglePlaylist()"><i class="fas fa-list"></i> Danh Sách Nhạc</button>
+    <button onclick="playAllMusic()"><i class="fas fa-play-circle"></i> Nghe Tất Cả</button>
   </div>
 
   <div id="musicBox" style="display:none;">
@@ -413,6 +412,14 @@
     if (currentTracks.length > 0) {
       playTrack(currentIndex);
     }
+  }
+
+  function playAllMusic() {
+    currentTracks = Array.from({length: musicFiles.length}, (_, i) => i);
+    currentIndex = 0;
+    playTrack(currentIndex);
+    document.getElementById('musicBox').style.display = 'block';
+    updateMusicList();
   }
 
   function playTrack(index) {
